@@ -31,13 +31,11 @@ pipeline {
 
         stage('Build & Push Docker Image') {
             steps {
-                // Use Jenkins credentials correctly
-                withCredentials([usernamePassword(credentialsId: 'docker-hub-credential', 
-                                                  usernameVariable: 'DOCKER_HUB_USER', 
-                                                  passwordVariable: 'DOCKER_HUB_PASS')]) {
+                // Use Jenkins credentials here
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credential')]) {
                     sh """
-                        # Login to Docker Hub before build
-                        docker login -u \$DOCKER_HUB_USER -p \$DOCKER_HUB_PASS
+                        # Login to Docker Hub
+                        docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASS
 
                         # Remove old image if exists
                         if docker images -q irosh2002/maven-web-app > /dev/null; then
