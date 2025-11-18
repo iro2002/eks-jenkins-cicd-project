@@ -7,6 +7,8 @@ pipeline {
 
     environment {
         KUBECONFIG = '/var/lib/jenkins/.kube/config'
+        DOCKER_HUB_USER = 'irosh2002'
+        DOCKER_HUB_PASS = credentials('dockerhub-password') 
     }
 
     stages {
@@ -31,10 +33,20 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
-                    if docker images -q iro2002/maven-web-app > /dev/null; then
-                        docker rmi -f iro2002/maven-web-app
+                    if docker images -q maven-web-app > /dev/null; then
+                        docker rmi -f maven-web-app
                     fi
-                    docker build -t iro2002/maven-web-app .
+                    docker build -t maven-web-app:1.0 .
+                '''
+            }
+        }
+
+        stage('Docker Login & Push') {
+            steps {
+                sh '''
+                    echo "$DOCKER_HUB_PASS" | docker login -u "$DOCKER_HUB_USER" --password-stdin
+                    docker tag maven-web-app:1.0 $DOCKER_HUB_USER/maven-web-app:latest
+                    docker push $DOCKER_HUB_USER/maven-web-app:latest
                 '''
             }
         }
@@ -51,7 +63,7 @@ pipeline {
 
     post {
         always { echo 'Pipeline finished' }
-        success { echo 'Build and deploy completed successfully!' }
+        success { echo 'Build, push, and deploy completed successfully!' }
         failure { echo 'Pipeline failed. Check logs.' }
     }
 }
