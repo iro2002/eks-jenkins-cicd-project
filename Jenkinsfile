@@ -23,8 +23,9 @@ pipeline {
 
         stage('Docker Build & Push') {
             steps {
-                sh '''
-            
+                sh """
+                    # Login to Docker Hub
+                    docker login -u ${DOCKER_HUB_USER} -p ${DOCKER_HUB_PASS}
 
                     # Remove old image if exists
                     if docker images -q irosh2002/maven-web-app > /dev/null; then
@@ -34,8 +35,9 @@ pipeline {
                     # Build new Docker image
                     docker build -t irosh2002/maven-web-app:latest .
 
-                
-                '''
+                    # Push Docker image to Docker Hub
+                    docker push irosh2002/maven-web-app:latest
+                """
             }
         }
 
