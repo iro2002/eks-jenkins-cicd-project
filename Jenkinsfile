@@ -6,7 +6,6 @@ pipeline {
     }
 
     environment {
-      
         KUBECONFIG = '/var/lib/jenkins/.kube/config'
     }
 
@@ -32,27 +31,13 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
-                    # Remove existing image if exists
-                    if docker images -q iro2002/maven-web-app > /dev/null; then
-                        docker rmi -f iro2002/maven-web-app
-                    fi
-                    # Build new image
-                    docker build -t irosh2002/maven-web-app .
+                    docker images -q iro2002/maven-web-app | grep -q . && docker rmi -f iro2002/maven-web-app || echo "No existing image"
+                    docker build -t iro2002/maven-web-app .
                 '''
             }
         }
 
-        stage('Deploy to Kubernetes') {
-    steps {
-        dir('k8s') {
-            withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
-                sh 'kubectl apply -f deployment.yaml'
-                sh 'kubectl apply -f service.yaml'
-            }
-        }
-    }
-}
-
+       
     }
 
     post {
