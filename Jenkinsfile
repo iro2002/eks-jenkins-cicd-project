@@ -29,25 +29,18 @@ pipeline {
             }
         }
 
-    stage('Build Docker Image') {
-        steps {
-            withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', 
-                                            usernameVariable: 'DOCKER_USER', 
-                                            passwordVariable: 'DOCKER_PASS')]) {
+        stage('Build Docker Image') {
+            steps {
                 sh '''
-                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
                     # Remove existing image if exists
                     if docker images -q iro2002/maven-web-app > /dev/null; then
                         docker rmi -f iro2002/maven-web-app
                     fi
                     # Build new image
                     docker build -t iro2002/maven-web-app .
-                    docker logout
                 '''
             }
         }
-    }
-
 
         stage('Deploy to Kubernetes') {
     steps {
@@ -64,7 +57,7 @@ pipeline {
 
     post {
         always { echo 'Pipeline finished' }
-        success { echo 'Build and deploy completed, successfully!' }
+        success { echo 'Build and deploy completed successfully!' }
         failure { echo 'Pipeline failed. Check logs.' }
     }
 }
