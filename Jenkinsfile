@@ -60,7 +60,7 @@ pipeline {
                     sh 'kubectl delete -f deployment.yaml || true'
                     sh 'kubectl delete -f service.yaml || true'
 
-                    echo "Applying new Kubernetes resources..."
+                    echo "Applying new Kubernetes resources.."
 
                  
                     sh 'kubectl apply -f deployment.yaml'
