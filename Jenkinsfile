@@ -7,6 +7,8 @@ pipeline {
 
     environment {
         KUBECONFIG = '/var/lib/jenkins/.kube/config'
+        DOCKER_HUB_USER = 'irosh2002'
+        DOCKER_HUB_PASS = credentials('dockerhub-password') 
     }
 
     stages {
@@ -29,13 +31,22 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build & Push Docker Image') {
             steps {
                 sh '''
+                    # Remove old image if exists
                     if docker images -q irosh2002/maven-web-app > /dev/null; then
                         docker rmi -f irosh2002/maven-web-app
                     fi
-                    docker build -t irosh2002/maven-web-app .
+
+                    # Build new Docker image
+                    docker build -t irosh2002/maven-web-app:latest .
+
+                    # Login to Docker Hub
+                    echo $DOCKER_HUB_PASS | docker login -u $DOCKER_HUB_USER --password-stdin
+
+                    # Push image to Docker Hub
+                    docker push irosh2002/maven-web-app:latest
                 '''
             }
         }
@@ -43,16 +54,15 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 dir('k8s') {
-
                     echo "Deleting old Kubernetes resources..."
 
-                    // Delete old deployment & service (ignore errors)
+                
                     sh 'kubectl delete -f deployment.yaml || true'
                     sh 'kubectl delete -f service.yaml || true'
 
                     echo "Applying new Kubernetes resources..."
 
-                    // Apply fresh deployment & service
+                 
                     sh 'kubectl apply -f deployment.yaml'
                     sh 'kubectl apply -f service.yaml'
                 }

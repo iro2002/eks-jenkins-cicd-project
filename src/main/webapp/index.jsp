@@ -40,7 +40,7 @@
 <body>
 
     <div class="home-container">
-        <h1>Welcome to My Maven Web App</h1>
+        <h1>Welcome to My Maven Web App.</h1>
 
         <a href="profile.jsp">Go to My Profile</a>
     </div>
