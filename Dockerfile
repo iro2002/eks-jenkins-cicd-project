@@ -10,5 +10,5 @@ COPY target/maven-web-app.war /usr/local/tomcat/webapps/ROOT.war
 # Expose Tomcat port
 EXPOSE 8080
 
-# Start Tomcat
+
 CMD ["catalina.sh", "run"]
