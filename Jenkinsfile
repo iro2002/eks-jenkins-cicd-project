@@ -29,8 +29,9 @@ pipeline {
 
         stage('build docker image') {
             steps {
+                sh 'docker rmi irosh2002/maven-web-app || true'   
            
-                sh 'docker build -t iro2002/maven-web-app .'
+                sh 'docker build -t irosh2002/maven-web-app .'
             }
         }
 
