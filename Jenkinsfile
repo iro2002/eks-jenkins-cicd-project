@@ -10,6 +10,7 @@ pipeline {
     }
 
     stages {
+
         stage('Clone Repository') {
             steps {
                 git branch: 'main', url: 'https://github.com/iro2002/eks-jenkins-cicd-project.git'
@@ -32,7 +33,7 @@ pipeline {
             steps {
                 sh '''
                     if docker images -q irosh2002/maven-web-app > /dev/null; then
-                        docker rmi -f iro2002/maven-web-app
+                        docker rmi -f irosh2002/maven-web-app
                     fi
                     docker build -t irosh2002/maven-web-app .
                 '''
@@ -42,6 +43,16 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 dir('k8s') {
+
+                    echo "Deleting old Kubernetes resources..."
+
+                    // Delete old deployment & service (ignore errors)
+                    sh 'kubectl delete -f deployment.yaml || true'
+                    sh 'kubectl delete -f service.yaml || true'
+
+                    echo "Applying new Kubernetes resources..."
+
+                    // Apply fresh deployment & service
                     sh 'kubectl apply -f deployment.yaml'
                     sh 'kubectl apply -f service.yaml'
                 }
