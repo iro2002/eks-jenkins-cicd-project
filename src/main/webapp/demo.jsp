@@ -40,7 +40,7 @@
         <h1>My Profile</h1>
 
         <div class="profile-info">
-            <strong>Name:</strong> Chamindu Irosh <br>
+            <strong>Name:</strong> Chamindu Irosh. <br>
             <strong>Role:</strong> UOC Undergraduate / DevOps Enthusiast <br>
             <strong>Location:</strong> Galle, Sri Lanka <br>
             <strong>Interests:</strong> Cloud, DevOps, System Administration <br>
