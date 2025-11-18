@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Wellcome Demo Page:::</title>
+    <title>Wellcome Demo page</title>
 </head>
 <body>
     <h1>This is a Demo Page</h1>
