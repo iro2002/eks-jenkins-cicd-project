@@ -5,10 +5,6 @@ pipeline {
         maven 'Maven 3.9.11' 
     }
 
-    environment {
-        DOCKERHUB_CREDENTIALS_ID = 'docker-hub-credentials'
-    }
-
     stages {
         stage('Clone Repository') {
             steps {
@@ -22,18 +18,23 @@ pipeline {
             }
         }
 
-        stage('Login to Docker Hub') {
+        stage('Test') {
             steps {
-                script {
-                    withCredentials([usernamePassword(
-                        credentialsId: env.DOCKERHUB_CREDENTIALS_ID,
-                        usernameVariable: 'DOCKER_USER',
-                        passwordVariable: 'DOCKER_PASS'
-                    )]) {
-                        sh '''
-                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        '''
-                    }
+                sh 'mvn test'
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker-hub-credentials',
+                    usernameVariable: 'DOCKER_USERNAME',
+                    passwordVariable: 'DOCKER_PASSWORD'
+                )]) {
+                    sh '''
+                        echo "Logging into Docker Hub..."
+                        docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+                    '''
                 }
             }
         }
@@ -41,8 +42,10 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Clean up any existing images
+                    // Remove any existing image (ignore errors if it doesn't exist)
                     sh 'docker rmi irosh2002/maven-web-app:latest || true'
+                    
+                    // Build the Docker image
                     sh 'docker build -t irosh2002/maven-web-app .'
                 }
             }
@@ -50,16 +53,15 @@ pipeline {
 
         stage('Push Docker Image') {
             steps {
-                script {
-                    withCredentials([usernamePassword(
-                        credentialsId: env.DOCKERHUB_CREDENTIALS_ID,
-                        usernameVariable: 'DOCKER_USER',
-                        passwordVariable: 'DOCKER_PASS'
-                    )]) {
-                        sh '''
-                            docker push irosh2002/maven-web-app:latest
-                        '''
-                    }
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker-hub-credentials',
+                    usernameVariable: 'DOCKER_USERNAME',
+                    passwordVariable: 'DOCKER_PASSWORD'
+                )]) {
+                    sh '''
+                        echo "Pushing image to Docker Hub..."
+                        docker push irosh2002/maven-web-app:latest
+                    '''
                 }
             }
         }
@@ -67,8 +69,8 @@ pipeline {
 
     post {
         always {
-            echo 'Pipeline execution completed.'
-         
+            echo 'This will always run after the stages finish.'
+            // Clean up - logout from Docker Hub
             sh 'docker logout || true'
         }
         success {
