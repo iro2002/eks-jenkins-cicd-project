@@ -31,32 +31,15 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
-                    # Remove existing image if exists
-                    if docker images -q maven-web-app > /dev/null; then
-                        docker rmi -f maven-web-app
+                    if docker images -q iro2002/maven-web-app > /dev/null; then
+                        docker rmi -f iro2002/maven-web-app
                     fi
-                    # Build new Docker image
-                    docker build -t maven-web-app:1.0 .
+                    docker build -t iro2002/maven-web-app .
                 '''
             }
         }
 
-        stage('Docker Login & Push') {
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-password', 
-                    usernameVariable: 'DOCKER_USER', 
-                    passwordVariable: 'DOCKER_PASS')]) {
-                    sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker tag maven-web-app:1.0 $DOCKER_USER/maven-web-app:latest
-                        docker push $DOCKER_USER/maven-web-app:latest
-                    '''
-                }
-            }
-        }
-
-        stage('Deploy to Kubernetes') { 
+        stage('Deploy to Kubernetes') {
             steps {
                 dir('k8s') {
                     sh 'kubectl apply -f deployment.yaml'
@@ -68,7 +51,7 @@ pipeline {
 
     post {
         always { echo 'Pipeline finished' }
-        success { echo 'Build, push, and deploy completed successfully!' }
+        success { echo 'Build and deploy completed successfully!' }
         failure { echo 'Pipeline failed. Check logs.' }
     }
 }
