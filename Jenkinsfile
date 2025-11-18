@@ -37,7 +37,7 @@ pipeline {
                         docker rmi -f iro2002/maven-web-app
                     fi
                     # Build new image
-                    docker build -t iro2002/maven-web-app .
+                    docker build -t irosh2002/maven-web-app .
                 '''
             }
         }
