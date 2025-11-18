@@ -54,7 +54,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 dir('k8s') {
-                    echo "Deleting old Kubernetes resources..."
+                    echo "Deleting old Kubernetes resources.."
 
                 
                     sh 'kubectl delete -f deployment.yaml || true'
