@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: mavenwebappcontainer
-        image: iro2002/maven-web-app:latest
+        image: irosh2002/maven-web-app:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
