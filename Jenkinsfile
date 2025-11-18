@@ -5,42 +5,71 @@ pipeline {
         maven 'Maven 3.9.11' 
     }
 
+    environment {
+        DOCKERHUB_CREDENTIALS_ID = 'docker-hub-credentials'
+    }
+
     stages {
         stage('Clone Repository') {
             steps {
-             
                 git branch: 'main', url: 'https://github.com/iro2002/eks-jenkins-cicd-project.git'
             }
         }
 
         stage('Build') {
             steps {
-             
                 sh 'mvn clean package'
             }
         }
 
-        stage('Test') {
+        stage('Login to Docker Hub') {
             steps {
-           
-                sh 'mvn test'
+                script {
+                    withCredentials([usernamePassword(
+                        credentialsId: env.DOCKERHUB_CREDENTIALS_ID,
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )]) {
+                        sh '''
+                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        '''
+                    }
+                }
             }
         }
 
-        stage('build docker image') {
+        stage('Build Docker Image') {
             steps {
-                sh 'docker rmi irosh2002/maven-web-app || true'   
-           
-                sh 'docker build -t irosh2002/maven-web-app .'
+                script {
+                    // Clean up any existing images
+                    sh 'docker rmi irosh2002/maven-web-app:latest || true'
+                    sh 'docker build -t irosh2002/maven-web-app .'
+                }
             }
         }
 
-       
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(
+                        credentialsId: env.DOCKERHUB_CREDENTIALS_ID,
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )]) {
+                        sh '''
+                            docker push irosh2002/maven-web-app:latest
+                        '''
+                    }
+                }
+            }
+        }
     }
 
     post {
         always {
-            echo 'This will always run after the stages finish.'
+            echo 'Pipeline execution completed.'
+         
+            sh 'docker logout || true'
         }
         success {
             echo 'Build completed successfully!'
