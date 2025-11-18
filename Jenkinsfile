@@ -69,6 +69,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 sh '''
+                    kubectl delete pod -l app=maven-web-app --ignore-not-found=true
                     echo "Applying Kubernetes deployment and service..."
                     kubectl apply -f k8s/deployment.yaml
                     kubectl apply -f k8s/service.yaml
