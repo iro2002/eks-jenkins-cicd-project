@@ -5,6 +5,11 @@ pipeline {
         maven 'Maven 3.9.11'
     }
 
+    environment {
+      
+        KUBECONFIG = '/var/lib/jenkins/.kube/config'
+    }
+
     stages {
         stage('Clone Repository') {
             steps {
@@ -27,9 +32,11 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
-                    if docker images -q iro2002/maven-web-app; then
+                    # Remove existing image if exists
+                    if docker images -q iro2002/maven-web-app > /dev/null; then
                         docker rmi -f iro2002/maven-web-app
                     fi
+                    # Build new image
                     docker build -t iro2002/maven-web-app .
                 '''
             }
@@ -38,6 +45,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 dir('k8s') {
+                    // Use KUBECONFIG environment variable
                     sh 'kubectl apply -f deployment.yaml'
                     sh 'kubectl apply -f service.yaml'
                 }
@@ -48,6 +56,6 @@ pipeline {
     post {
         always { echo 'Pipeline finished' }
         success { echo 'Build and deploy completed successfully!' }
-        failure { echo 'Pipeline failed. Check logs ' }
+        failure { echo 'Pipeline failed. Check logs.' }
     }
 }
