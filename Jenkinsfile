@@ -6,11 +6,12 @@ pipeline {
     }
 
     environment {
-      
+        // Ensure Jenkins uses the correct kubeconfig
         KUBECONFIG = '/var/lib/jenkins/.kube/config'
     }
 
     stages {
+
         stage('Clone Repository') {
             steps {
                 git branch: 'main', url: 'https://github.com/iro2002/eks-jenkins-cicd-project.git'
@@ -36,7 +37,7 @@ pipeline {
                     if docker images -q iro2002/maven-web-app > /dev/null; then
                         docker rmi -f iro2002/maven-web-app
                     fi
-                    # Build new image
+                    # Build new Docker image
                     docker build -t iro2002/maven-web-app .
                 '''
             }
@@ -45,12 +46,15 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 dir('k8s') {
-                    // Use KUBECONFIG environment variable
-                    sh 'kubectl apply -f deployment.yaml'
-                    sh 'kubectl apply -f service.yaml'
+                    // Explicitly set KUBECONFIG for kubectl commands
+                    withEnv(["KUBECONFIG=${env.KUBECONFIG}"]) {
+                        sh 'kubectl apply -f deployment.yaml'
+                        sh 'kubectl apply -f service.yaml'
+                    }
                 }
             }
         }
+
     }
 
     post {
