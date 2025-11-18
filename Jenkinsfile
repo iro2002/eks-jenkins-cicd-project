@@ -8,7 +8,7 @@ pipeline {
     environment {
         KUBECONFIG = '/var/lib/jenkins/.kube/config'
         DOCKER_HUB_USER = 'irosh2002'
-        DOCKER_HUB_PASS = credentials('dockerhub-password') 
+        DOCKER_HUB_PASS = credentials('dockerhub-pw') 
     }
 
     stages {
