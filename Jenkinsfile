@@ -64,6 +64,6 @@ pipeline {
     post {
         always { echo 'Pipeline finished' }
         success { echo 'Build, push, and deploy completed successfully!' }
-        failure { echo 'Pipeline failed. Check logs.' }
+        failure { echo 'Pipeline failed. Check los.' }
     }
 }
