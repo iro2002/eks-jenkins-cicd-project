@@ -43,7 +43,7 @@
             <strong>Name:</strong> Chamindu Irosh. <br>
             <strong>Role:</strong> UOC Undergraduate / DevOps Enthusiast <br>
             <strong>Location:</strong> Galle, Sri Lanka <br>
-            <strong>Interests:</strong> Cloud, DevOps, System Administration <br>
+            <strong>Interests:</strong> Cloud, DevOps, System Administration. <br>
         </div>
 
         <a class="back-link" href="index.jsp">⬅ Back to Home</a>
