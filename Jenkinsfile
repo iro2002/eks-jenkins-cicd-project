@@ -64,6 +64,16 @@ pipeline {
                     '''
                 }
             }
+
+        }
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                    echo "Applying Kubernetes deployment and service..."
+                    kubectl apply -f k8s/deployment.yaml
+                    kubectl apply -f k8s/service.yaml
+                '''
+            }
         }
     }
 

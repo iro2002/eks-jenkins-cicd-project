@@ -7,5 +7,5 @@ spec:
   selector:
     app: mavenwebapp
   ports:
-    - port: 80         # ELB port
+    - port: 80       
       targetPort: 8080
