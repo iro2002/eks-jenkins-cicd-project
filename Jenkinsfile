@@ -13,7 +13,6 @@ pipeline {
 
     stages {
 
-  
         stage('Build & Test') {
             steps {
                 echo "Running Maven build and tests..."
@@ -22,11 +21,10 @@ pipeline {
             }
         }
 
-  
         stage('Docker Build & Push') {
             steps {
                 sh '''
-                    # Login to Docker Hub first (important for base images)
+                    # Login to Docker Hub correctly
                     echo $DOCKER_HUB_PASS | docker login -u $DOCKER_HUB_USER --password-stdin
 
                     # Remove old image if exists
@@ -42,7 +40,6 @@ pipeline {
                 '''
             }
         }
-
 
         stage('Deploy to Kubernetes') {
             steps {
