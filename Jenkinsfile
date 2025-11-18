@@ -31,10 +31,10 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
-                    if docker images -q iro2002/maven-web-app > /dev/null; then
+                    if docker images -q irosh2002/maven-web-app > /dev/null; then
                         docker rmi -f iro2002/maven-web-app
                     fi
-                    docker build -t iro2002/maven-web-app .
+                    docker build -t irosh2002/maven-web-app .
                 '''
             }
         }

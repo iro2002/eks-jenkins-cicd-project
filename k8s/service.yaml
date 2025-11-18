@@ -3,9 +3,10 @@ kind: Service
 metadata:
   name: mavenwebappsvc
 spec:
-  type: LoadBalancer
   selector:
     app: mavenwebapp
   ports:
-    - port: 80
-      targetPort: 8080
+    - protocol: TCP
+      port: 80         
+      targetPort: 8080 
+  type: LoadBalancer
