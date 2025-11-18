@@ -8,47 +8,61 @@ pipeline {
     environment {
         KUBECONFIG = '/var/lib/jenkins/.kube/config'
         DOCKER_HUB_USER = 'irosh2002'
-        DOCKER_HUB_PASS = credentials('dockerhub-pw') 
+        DOCKER_HUB_PASS = credentials('dockerhub-password') 
     }
 
     stages {
 
-        stage('Build & Test') {
+        stage('Clone Repository') {
             steps {
-                echo "Running Maven build and tests..."
+                git branch: 'main', url: 'https://github.com/iro2002/eks-jenkins-cicd-project.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
                 sh 'mvn clean package'
+            }
+        }
+
+        stage('Test') {
+            steps {
                 sh 'mvn test'
             }
         }
 
-        stage('Docker Build & Push') {
+        stage('Build & Push Docker Image') {
             steps {
-                sh """
-                    # Login to Docker Hub
-                    docker login -u ${DOCKER_HUB_USER} -p ${DOCKER_HUB_PASS}
-
+                sh '''
                     # Remove old image if exists
                     if docker images -q irosh2002/maven-web-app > /dev/null; then
                         docker rmi -f irosh2002/maven-web-app
                     fi
 
-                    # Build new Docker image
+                    # Build new Docker images
                     docker build -t irosh2002/maven-web-app:latest .
 
-                    # Push Docker image to Docker Hub
+                    # Login to Docker Hub
+                    echo $DOCKER_HUB_PASS | docker login -u $DOCKER_HUB_USER --password-stdin
+
+                    # Push image to Docker Hub
                     docker push irosh2002/maven-web-app:latest
-                """
+                '''
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
                 dir('k8s') {
-                    echo "Deleting old Kubernetes resources..."
+                    echo "Deleting old Kubernetes resources.."
+
+                
                     sh 'kubectl delete -f deployment.yaml || true'
                     sh 'kubectl delete -f service.yaml || true'
 
-                    echo "Applying new Kubernetes resources..."
+                    echo "Applying new Kubernetes resources.."
+
+                 
                     sh 'kubectl apply -f deployment.yaml'
                     sh 'kubectl apply -f service.yaml'
                 }
