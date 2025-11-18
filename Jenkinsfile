@@ -7,8 +7,6 @@ pipeline {
 
     environment {
         KUBECONFIG = '/var/lib/jenkins/.kube/config'
-        DOCKER_HUB_USER = 'irosh2002'
-        DOCKER_HUB_PASS = credentials('dockerhub-password') 
     }
 
     stages {
@@ -33,21 +31,26 @@ pipeline {
 
         stage('Build & Push Docker Image') {
             steps {
-                sh '''
-                    # Remove old image if exists
-                    if docker images -q irosh2002/maven-web-app > /dev/null; then
-                        docker rmi -f irosh2002/maven-web-app
-                    fi
+                // Use Jenkins credentials correctly
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credential', 
+                                                  usernameVariable: 'DOCKER_HUB_USER', 
+                                                  passwordVariable: 'DOCKER_HUB_PASS')]) {
+                    sh """
+                        # Login to Docker Hub before build
+                        docker login -u \$DOCKER_HUB_USER -p \$DOCKER_HUB_PASS
 
-                    # Build new Docker images
-                    docker build -t irosh2002/maven-web-app:latest .
+                        # Remove old image if exists
+                        if docker images -q irosh2002/maven-web-app > /dev/null; then
+                            docker rmi -f irosh2002/maven-web-app
+                        fi
 
-                    # Login to Docker Hub
-                    echo $DOCKER_HUB_PASS | docker login -u $DOCKER_HUB_USER --password-stdin
+                        # Build new Docker image
+                        docker build -t irosh2002/maven-web-app:latest .
 
-                    # Push image to Docker Hub
-                    docker push irosh2002/maven-web-app:latest
-                '''
+                        # Push image to Docker Hub
+                        docker push irosh2002/maven-web-app:latest
+                    """
+                }
             }
         }
 
@@ -55,14 +58,10 @@ pipeline {
             steps {
                 dir('k8s') {
                     echo "Deleting old Kubernetes resources.."
-
-                
                     sh 'kubectl delete -f deployment.yaml || true'
                     sh 'kubectl delete -f service.yaml || true'
 
                     echo "Applying new Kubernetes resources.."
-
-                 
                     sh 'kubectl apply -f deployment.yaml'
                     sh 'kubectl apply -f service.yaml'
                 }
